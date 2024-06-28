@@ -24,7 +24,7 @@ $lnkfiles = Get-ChildItem -Path "$desktop\Startup\Telegram_*.lnk" | Sort-Object 
 Write-Output "Telegram_*.lnk files: $($lnkfiles.Count)"
 
 # get how many desktops need to add
-$add_desk = [math]::Ceiling($lnkfiles.Count / $maxTelegram)
+$add_desk = [math]::Round($lnkfiles.Count / $maxTelegram, 0, [MidpointRounding]::AwayFromZero)
 Write-Output "$add_desk need add."
 
 # Initial add desktops
