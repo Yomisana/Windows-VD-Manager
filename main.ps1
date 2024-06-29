@@ -1,10 +1,10 @@
-﻿###### 設定 ######
+﻿###### Settings ######
 $desktop = [System.Environment]::GetFolderPath('Desktop')
 $maxTelegram = 10
 $timeout = 1
-###### 設定 ######
+###### Settings ######
 
-# 檢查是否以管理員權限運行
+# Check if running with administrator privileges
 if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
     if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
         $CommandLine = "-NoExit -c `"cd '$pwd'; & '" + $MyInvocation.MyCommand.Path + "'`""
@@ -13,7 +13,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
-# 確認是否安裝了 VirtualDesktop 模組，沒有的話就安裝
+# Check if VirtualDesktop module is installed, install if not
 if (-not (Get-Module -ListAvailable -Name VirtualDesktop)) {
     Write-Output "VirtualDesktop module not found. Installing..."
     Install-PackageProvider NuGet -Force;
@@ -31,6 +31,7 @@ Write-Output "Current desktop: $(Get-DesktopCount)"
 #Remove-AllDesktops
 #Write-Output "All desktops removed."
 
+# Get all Telegram lnk files from startup directory
 $lnkfiles = Get-ChildItem -Path "$desktop\Startup\Telegram_*.lnk" | Sort-Object { [int]($_.BaseName -replace 'Telegram_', '') }
 Write-Output "Telegram_*.lnk files: $($lnkfiles.Count)"
 Write-Output "$($lnkfiles.Count) / $maxTelegram => $([math]::Ceiling($lnkfiles.Count / $maxTelegram))"

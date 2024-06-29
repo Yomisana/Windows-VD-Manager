@@ -1,8 +1,8 @@
-# 服務名稱
+# Service name
 $serviceName = "VDManagerService"
 $taskName = "VDManagerServiceStartup"
 
-# 檢查是否以管理員權限運行
+# Check if running with administrator privileges
 if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
     if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
         $CommandLine = "-NoExit -c `"cd '$pwd'; & '" + $MyInvocation.MyCommand.Path + "'`""
@@ -13,19 +13,19 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 Uninstall-Module -Name VirtualDesktop
 
-# 刪除工作排程
+# Remove scheduled task
 $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if ($task -ne $null) {
     try {
         Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-        Write-Output "成功刪除工作排程 '$taskName'。"
+        Write-Output "Successfully deleted scheduled task '$taskName'."
     }
     catch {
-        Write-Error "刪除工作排程時發生錯誤： $_"
+        Write-Error "Error occurred while deleting scheduled task: $_"
     }
 }
 else {
-    Write-Host "找不到名為 '$taskName' 的工作排程。"
+    Write-Host "Could not find scheduled task '$taskName'."
 }
 
 Pause
