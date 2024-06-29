@@ -15,6 +15,13 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
+# RemoteSigned Unrestricted
+$executionPolicy = Get-ExecutionPolicy -Scope Process
+if ($executionPolicy -ne "RemoteSigned" -and $executionPolicy -ne "Unrestricted") {
+    Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+}
+
+
 # Create trigger - At logon
 $trigger = New-ScheduledTaskTrigger -AtLogon
 

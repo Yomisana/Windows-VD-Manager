@@ -13,6 +13,12 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
+# RemoteSigned Unrestricted
+$executionPolicy = Get-ExecutionPolicy -Scope Process
+if ($executionPolicy -ne "RemoteSigned" -and $executionPolicy -ne "Unrestricted") {
+    Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+}
+
 # Check if VirtualDesktop module is installed, install if not
 if (-not (Get-Module -ListAvailable -Name VirtualDesktop)) {
     Write-Output "VirtualDesktop module not found. Installing..."
