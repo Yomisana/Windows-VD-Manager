@@ -1,26 +1,31 @@
 # 服務名稱
 $serviceName = "VDManagerService"
+$taskName = "VDManagerServiceStartup"
 
-if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warning "請以管理員權限運行此腳本！"
-    if (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
-        Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList "-File `"$($MyInvocation.MyCommand.Path)`"  `"$($MyInvocation.MyCommand.UnboundArguments)`""
+# 檢查是否以管理員權限運行
+if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator')) {
+    if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
+        $CommandLine = "-NoExit -c `"cd '$pwd'; & '" + $MyInvocation.MyCommand.Path + "'`""
+        Start-Process powershell -Verb runas -ArgumentList $CommandLine
         Exit
     }
-    Pause
-    #exit 1
 }
 
-# 停止服務
-if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
-    #Stop-Service -Name $serviceName
-    # 刪除服務
-    #Remove-Service -Name $serviceName
-    sc.exe delete $serviceName
-    #Write-Host "VDManagerService 已成功卸載。"
+Uninstall-Module -Name VirtualDesktop
+
+# 刪除工作排程
+$task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+if ($task -ne $null) {
+    try {
+        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+        Write-Output "成功刪除工作排程 '$taskName'。"
+    }
+    catch {
+        Write-Error "刪除工作排程時發生錯誤： $_"
+    }
 }
 else {
-    Write-Host "服務 $serviceName 不存在。"
+    Write-Host "找不到名為 '$taskName' 的工作排程。"
 }
 
 Pause

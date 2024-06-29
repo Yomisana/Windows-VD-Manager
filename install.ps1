@@ -1,11 +1,7 @@
-# 服務名稱
+# 定義變數
+$taskName = "VDManagerServiceStartup"
+$taskDescription = "Task to start VD Manager Service on user logon"
 $serviceName = "VDManagerService"
-# 服務顯示名稱
-$serviceDisplayName = "VD Manager Service"
-# 服務描述
-$serviceDescription = "Service to manage Windows virtual desktops"
-# PowerShell 腳本的路徑
-# 保存原始的工作目錄
 $originalPath = Get-Location
 $scriptPath = Join-Path $originalPath "main.ps1"
 Write-Output $($scriptPath)
@@ -19,15 +15,14 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
+# 建立觸發器 - 登入時啟動
+$trigger = New-ScheduledTaskTrigger -AtLogon
 
-# 檢查服務是否已存在
-if (Get-Service -Name $serviceName -ErrorAction SilentlyContinue) {
-    Write-Host "服務 $serviceName 已經存在。"
-    Pause
-    exit 1
-}
+# 建立動作 - 執行 PowerShell 腳本
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$scriptPath`""
 
-
-New-Service -Name $serviceName -BinaryPathName $scriptPath -DisplayName $serviceDisplayName -StartupType "Automatic" -Description $serviceDescription
-
+# 註冊工作排程
+#Register-ScheduledTask -TaskName $taskName -Trigger $trigger -Action $action -Description $taskDescription -User "SYSTEM"
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -RunLevel Highest -Force
+Write-Output "已成功設置工作排程 '$taskName' 以在使用者登入時啟動服務。"
 Pause
