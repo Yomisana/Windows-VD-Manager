@@ -1,2 +1,2 @@
 @echo off
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0uninstall.ps1"
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File ""%~dp0uninstall.ps1""' -Verb RunAs"
